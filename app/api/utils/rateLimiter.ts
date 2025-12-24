@@ -5,7 +5,7 @@ export class RateLimiter {
   private redisInstance: RedisClientType;
   private time: number;
 
-  constructor(token: number, time = 86400) {
+  constructor(token = 10, time = 900) {
     this.tk = token;
     this.time = time;
     this.redisInstance = createClient();
