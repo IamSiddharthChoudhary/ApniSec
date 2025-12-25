@@ -11,7 +11,7 @@ export class ResendEmail {
   private r: Resend;
 
   constructor() {
-    this.r = new Resend(process.env.RESEND_API_KEY);
+    this.r = new Resend(process.env.NEXT_PUBLIC_RESEND);
   }
 
   async sendWelcome(to: string, name: string) {

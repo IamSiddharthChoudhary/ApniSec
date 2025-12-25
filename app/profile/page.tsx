@@ -2,67 +2,50 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, User, Lock, Mail, LayoutDashboard } from "lucide-react";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [nameLoading, setNameLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const router = useRouter();
+  const [usr, setUsr] = useState<any>(null);
+  const [ld, setLd] = useState(true);
+  const [nmLd, setNmLd] = useState(false);
+  const [pwLd, setPwLd] = useState(false);
+  const [err, setErr] = useState("");
+  const [succ, setSucc] = useState("");
+  const rtr = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
+    const tk = localStorage.getItem("token");
+    const usrData = localStorage.getItem("user");
 
-    if (!token) {
-      router.push("/auth/login");
+    if (!tk) {
+      rtr.push("/auth/login");
       return;
     }
 
-    if (userData) {
-      setUser(JSON.parse(userData));
+    if (usrData) {
+      setUsr(JSON.parse(usrData));
     }
-    setLoading(false);
-  }, [router]);
+    setLd(false);
+  }, [rtr]);
 
-  const handleLogout = async () => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    }
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/auth/login");
-  };
-
-  const handleUpdateName = async (e: React.FormEvent<HTMLFormElement>) => {
+  const updName = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setNameLoading(true);
-    setError("");
-    setSuccess("");
+    setNmLd(true);
+    setErr("");
+    setSucc("");
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const token = localStorage.getItem("token");
+    const fd = new FormData(e.currentTarget);
+    const nm = fd.get("name") as string;
+    const tk = localStorage.getItem("token");
 
     try {
       const res = await fetch("/api/user/update-name", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tk}`,
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: nm }),
       });
 
       if (!res.ok) {
@@ -70,54 +53,54 @@ export default function ProfilePage() {
         throw new Error(data.error || "Failed to update name");
       }
 
-      const updatedUser = { ...user, name };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setSuccess("Name updated successfully!");
+      const updUsr = { ...usr, name: nm };
+      setUsr(updUsr);
+      localStorage.setItem("user", JSON.stringify(updUsr));
+      setSucc("Name updated successfully!");
       e.currentTarget.reset();
     } catch (err: any) {
-      setError(err.message);
+      setErr(err.message);
     } finally {
-      setNameLoading(false);
+      setNmLd(false);
     }
   };
 
-  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const updPw = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setPasswordLoading(true);
-    setError("");
-    setSuccess("");
+    setPwLd(true);
+    setErr("");
+    setSucc("");
 
-    const formData = new FormData(e.currentTarget);
-    const oldPassword = formData.get("oldPassword") as string;
-    const newPassword = formData.get("newPassword") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    const fd = new FormData(e.currentTarget);
+    const oldPw = fd.get("oldPassword") as string;
+    const newPw = fd.get("newPassword") as string;
+    const confPw = fd.get("confirmPassword") as string;
 
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match");
-      setPasswordLoading(false);
+    if (newPw !== confPw) {
+      setErr("New passwords do not match");
+      setPwLd(false);
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
-      setPasswordLoading(false);
+    if (newPw.length < 6) {
+      setErr("Password must be at least 6 characters");
+      setPwLd(false);
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const tk = localStorage.getItem("token");
 
     try {
       const res = await fetch("/api/user/update-password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tk}`,
         },
         body: JSON.stringify({
-          email: user.email,
-          oldPassword,
-          newPassword,
+          email: usr.email,
+          oldPassword: oldPw,
+          newPassword: newPw,
         }),
       });
 
@@ -126,86 +109,99 @@ export default function ProfilePage() {
         throw new Error(data.error || "Failed to update password");
       }
 
-      setSuccess("Password updated successfully!");
+      setSucc("Password updated successfully!");
       e.currentTarget.reset();
     } catch (err: any) {
-      setError(err.message);
+      setErr(err.message);
     } finally {
-      setPasswordLoading(false);
+      setPwLd(false);
     }
   };
 
-  if (loading) {
+  if (ld) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="font-semibold">ApniSec Profile</div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-24 pb-12">
+      <main className="max-w-4xl mx-auto px-4">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Profile Settings
+            </h1>
+            <p className="text-slate-400">
+              Manage your account and preferences
+            </p>
           </div>
+          <button
+            onClick={() => rtr.push("/dashboard")}
+            className="flex items-center gap-2 rounded-lg bg-green-600/20 hover:bg-green-600/30 px-4 py-2 text-sm font-medium text-white transition-colors border border-green-500/20"
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            Dashboard
+          </button>
         </div>
-      </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
-        <p className="text-muted-foreground mb-8">
-          Manage your account settings and preferences
-        </p>
-
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-500/10 text-red-600 text-sm p-3">
-            {error}
+        {err && (
+          <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-4 backdrop-blur-sm">
+            {err}
           </div>
         )}
 
-        {success && (
-          <div className="mb-4 rounded-lg bg-green-500/10 text-green-600 text-sm p-3">
-            {success}
+        {succ && (
+          <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm p-4 backdrop-blur-sm">
+            {succ}
           </div>
         )}
 
         <div className="space-y-6">
-          {/* User Info */}
-          <div className="rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-4">Account Information</h2>
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm text-muted-foreground">Name:</span>
-                <p className="font-medium">{user?.name || "Not set"}</p>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                <User className="w-5 h-5 text-green-400" />
               </div>
-              <div>
-                <span className="text-sm text-muted-foreground">Email:</span>
-                <p className="font-medium">{user?.email}</p>
+              <h2 className="text-xl font-semibold text-white">
+                Account Information
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <User className="w-4 h-4 text-slate-400" />
+                <div>
+                  <p className="text-xs text-slate-500">Name</p>
+                  <p className="font-medium text-white">
+                    {usr?.name || "Not set"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <Mail className="w-4 h-4 text-slate-400" />
+                <div>
+                  <p className="text-xs text-slate-500">Email</p>
+                  <p className="font-medium text-white">{usr?.email}</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Update Name */}
-          <div className="rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-4">Update Name</h2>
-            <form onSubmit={handleUpdateName} className="space-y-4">
-              <div className="space-y-1">
-                <label htmlFor="name" className="text-sm font-medium">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                <User className="w-5 h-5 text-green-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-white">Update Name</h2>
+            </div>
+            <form onSubmit={updName} className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="name"
+                  className="text-sm font-medium text-white"
+                >
                   New Name
                 </label>
                 <input
@@ -214,26 +210,35 @@ export default function ProfilePage() {
                   type="text"
                   required
                   placeholder="Enter your new name"
-                  defaultValue={user?.name || ""}
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  defaultValue={usr?.name || ""}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
               <button
                 type="submit"
-                disabled={nameLoading}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+                disabled={nmLd}
+                className="rounded-lg bg-green-600 hover:bg-green-700 px-6 py-3 text-sm font-medium text-white transition-colors disabled:opacity-50"
               >
-                {nameLoading ? "Updating..." : "Update Name"}
+                {nmLd ? "Updating..." : "Update Name"}
               </button>
             </form>
           </div>
 
-          {/* Update Password */}
-          <div className="rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-4">Change Password</h2>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div className="space-y-1">
-                <label htmlFor="oldPassword" className="text-sm font-medium">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                <Lock className="w-5 h-5 text-green-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-white">
+                Change Password
+              </h2>
+            </div>
+            <form onSubmit={updPw} className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="oldPassword"
+                  className="text-sm font-medium text-white"
+                >
                   Current Password
                 </label>
                 <input
@@ -242,12 +247,15 @@ export default function ProfilePage() {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="newPassword" className="text-sm font-medium">
+              <div className="space-y-2">
+                <label
+                  htmlFor="newPassword"
+                  className="text-sm font-medium text-white"
+                >
                   New Password
                 </label>
                 <input
@@ -257,14 +265,14 @@ export default function ProfilePage() {
                   required
                   minLength={6}
                   placeholder="••••••••"
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <label
                   htmlFor="confirmPassword"
-                  className="text-sm font-medium"
+                  className="text-sm font-medium text-white"
                 >
                   Confirm New Password
                 </label>
@@ -275,16 +283,16 @@ export default function ProfilePage() {
                   required
                   minLength={6}
                   placeholder="••••••••"
-                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={passwordLoading}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+                disabled={pwLd}
+                className="rounded-lg bg-green-600 hover:bg-green-700 px-6 py-3 text-sm font-medium text-white transition-colors disabled:opacity-50"
               >
-                {passwordLoading ? "Updating..." : "Change Password"}
+                {pwLd ? "Updating..." : "Change Password"}
               </button>
             </form>
           </div>

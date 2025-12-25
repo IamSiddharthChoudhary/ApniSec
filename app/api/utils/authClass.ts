@@ -8,10 +8,7 @@ export class Auth {
     const user = await remote.getUser(email);
     if (user?.length) throw new Error("Already Registered");
 
-    const encPas = await bcrypt.hash(
-      password,
-      process.env.NEXT_PUBLIC_SALT || ""
-    );
+    const encPas = await bcrypt.hash(password, 10);
     const status = await remote.addUser(name, email, encPas);
     if (status === -1) throw new Error("Error registering");
 
@@ -21,7 +18,8 @@ export class Auth {
 
     const tk = jwt.sign(
       { id: newUser[0].id, email: newUser[0].email, name: newUser[0].name },
-      process.env.NEXT_PUBLIC_JWT_SECRET || ""
+      process.env.NEXT_PUBLIC_JWT_SECRET || "",
+      { expiresIn: "7d" }
     );
     return { user: newUser[0], tk };
   }

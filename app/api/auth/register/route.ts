@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
     const r = await req.json();
     const { name, email, password } = r;
 
+    console.log("Register attempt:", { name, email });
+
     if (!email || !password || !name) {
       return NextResponse.json(
         { error: "Missing required fields" },

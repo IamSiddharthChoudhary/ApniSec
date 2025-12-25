@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SbDataClient } from "../../utils/sbDataClient";
 import { Auth } from "../../utils/authClass";
-import { headers } from "next/headers";
-import { RateLimiter } from "../../utils/rateLimiter";
 
 const sbDataClient = new SbDataClient();
-const rateLimiter = new RateLimiter();
 const auth = new Auth();
-await rateLimiter.init();
 
 export async function PUT(
   req: NextRequest,
@@ -15,53 +11,45 @@ export async function PUT(
 ) {
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const tk = authHeader.split(" ")[1];
     const user = await auth.getCurUser(tk);
 
-    const h = await headers();
-    const ip =
-      h.get("x-forwarded-for")?.split(",")[0] ||
-      h.get("x-real-ip") ||
-      "unknown";
+    const body = await req.json();
+    const { status } = body;
 
-    const st = await rateLimiter.addReq(ip);
-    if (st === 429) {
-      return NextResponse.json(
-        { message: "Too many requests" },
-        { status: 429 }
-      );
-    }
-
-    const r = await req.json();
-    const { email, status } = r;
-    const id = Number(params.id);
-
-    if (!email || !status) {
+    if (!status) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    if (email !== user.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-    }
+    console.log("PUT /api/posts/[id] - Updating:", {
+      id: params.id,
+      email: user.email,
+      status,
+    });
 
-    const res = await sbDataClient.updateStatus(email, status, id);
+    const res = await sbDataClient.updateStatus(user.email, status, params.id);
+
     if (res === -1) {
       return NextResponse.json(
-        { message: "Error updating status" },
+        {
+          message: "Failed to update",
+          debug: { id: params.id, email: user.email },
+        },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ message: "Success" });
+    return NextResponse.json({ message: "Status updated" }, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Error" }, { status: 500 });
+    console.error("PUT /api/posts/[id] error:", e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
 
@@ -71,45 +59,67 @@ export async function DELETE(
 ) {
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const tk = authHeader.split(" ")[1];
     const user = await auth.getCurUser(tk);
 
-    const h = await headers();
-    const ip =
-      h.get("x-forwarded-for")?.split(",")[0] ||
-      h.get("x-real-ip") ||
-      "unknown";
+    console.log("DELETE /api/posts/[id] - Deleting:", {
+      id: params.id,
+      email: user.email,
+    });
 
-    const st = await rateLimiter.addReq(ip);
-    if (st === 429) {
+    const res = await sbDataClient.deletePost(user.email, params.id);
+
+    if (res === -1) {
       return NextResponse.json(
-        { message: "Too many requests" },
-        { status: 429 }
+        {
+          message: "Failed to delete",
+          debug: { id: params.id, email: user.email },
+        },
+        { status: 500 }
       );
     }
 
-    const r = await req.json();
-    const { email } = r;
-
-    if (!email) {
-      return NextResponse.json({ message: "Email required" }, { status: 400 });
-    }
-
-    if (email !== user.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-    }
-
-    const res = await sbDataClient.deletePost(email, Number(params.id));
-    if (res === -1) {
-      return NextResponse.json({ message: "Error deleting" }, { status: 500 });
-    }
-
-    return NextResponse.json({ message: "Success" });
+    return NextResponse.json({ message: "Deleted" }, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Error" }, { status: 500 });
+    console.error("DELETE /api/posts/[id] error:", e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tk = authHeader.split(" ")[1];
+    await auth.getCurUser(tk);
+
+    console.log("GET /api/posts/[id] - Fetching:", { id: params.id });
+
+    const post = await sbDataClient.getPostById(params.id);
+
+    if (!post || post === -1) {
+      return NextResponse.json(
+        {
+          message: "Not found",
+          debug: { id: params.id },
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ message: "Success", post }, { status: 200 });
+  } catch (e: any) {
+    console.error("GET /api/posts/[id] error:", e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

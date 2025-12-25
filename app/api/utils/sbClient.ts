@@ -7,7 +7,7 @@ export class SbClient {
 
   constructor(
     url = process.env.NEXT_PUBLIC_SB_URL,
-    key = process.env.NEXT_PUBLIC_SB_URL
+    key = process.env.NEXT_PUBLIC_SB_KEY
   ) {
     this.url = url ? url : " ";
     this.key = key ? key : " ";

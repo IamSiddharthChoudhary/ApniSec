@@ -3,26 +3,27 @@ import type React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Lock, Mail } from "lucide-react";
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [ld, setLd] = useState(false);
+  const [err, setErr] = useState("");
+  const rtr = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const hndlSub = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setLd(true);
+    setErr("");
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const fd = new FormData(e.currentTarget);
+    const eml = fd.get("email") as string;
+    const pw = fd.get("password") as string;
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: eml, password: pw }),
       });
 
       const data = await res.json();
@@ -34,85 +35,91 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      router.push("/dashboard");
+      rtr.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.");
+      setErr(err.message || "Login failed. Please check your credentials.");
     } finally {
-      setLoading(false);
+      setLd(false);
     }
   };
 
   return (
-    <div className="gradient-bg min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold">Sign In</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Welcome back to ApniSec
-          </p>
+    <div className="min-h-screen gradient-bg flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+          <p className="text-slate-400">Sign in to continue to ApniSec</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-500/10 text-red-600 text-sm p-3">
-              {error}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-8">
+          <form onSubmit={hndlSub} className="space-y-5">
+            {err && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3">
+                {err}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-white">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="you@company.com"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 pl-11 pr-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
             </div>
-          )}
 
-          <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="you@company.com"
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-white"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800/50 pl-11 pr-4 py-3 text-white placeholder:text-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+            </div>
 
-          <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              placeholder="••••••••"
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
-
-        <div className="mt-6 space-y-3 text-center text-sm">
-          <div>
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="text-primary hover:underline"
+            <button
+              type="submit"
+              disabled={ld}
+              className="w-full rounded-lg bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-medium text-white transition-colors disabled:opacity-50"
             >
-              Create one
-            </Link>
-          </div>
-          <div>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Forgot password?
-            </Link>
+              {ld ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+
+          <div className="mt-6 space-y-3 text-center text-sm">
+            <div className="text-slate-400">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/auth/register"
+                className="text-green-400 hover:text-green-300 font-medium"
+              >
+                Create one
+              </Link>
+            </div>
+            <div>
+              <Link href="#" className="text-slate-500 hover:text-slate-400">
+                Forgot password?
+              </Link>
+            </div>
           </div>
         </div>
       </div>

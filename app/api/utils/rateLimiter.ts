@@ -1,34 +1,42 @@
-import { createClient, RedisClientType } from "redis";
-
 export class RateLimiter {
   private tk: number;
-  private redisInstance: RedisClientType;
   private time: number;
+  private store: Map<string, { count: number; expires: number }>;
 
-  constructor(token = 10, time = 900) {
+  constructor(token = 100, time = 900000) {
     this.tk = token;
     this.time = time;
-    this.redisInstance = createClient();
+    this.store = new Map();
   }
 
-  async init() {
-    if (!this.redisInstance.isOpen) {
-      await this.redisInstance.connect();
+  async init() {}
+
+  private cleanup() {
+    const now = Date.now();
+    for (const [ip, data] of this.store.entries()) {
+      if (data.expires < now) {
+        this.store.delete(ip);
+      }
     }
   }
 
   public async addEntry(ip: string) {
-    const check = await this.redisInstance.get(ip);
-    if (check) {
-      await this.redisInstance.incr(ip);
+    this.cleanup();
+    const now = Date.now();
+    const entry = this.store.get(ip);
+
+    if (entry) {
+      entry.count++;
     } else {
-      await this.redisInstance.set(ip, 1, { EX: this.time });
+      this.store.set(ip, { count: 1, expires: now + this.time });
     }
   }
 
   public async check(ip: string) {
-    const ch = await this.redisInstance.get(ip);
-    if (ch && Number(ch) >= this.tk) {
+    this.cleanup();
+    const entry = this.store.get(ip);
+
+    if (entry && entry.count >= this.tk) {
       return false;
     }
     return true;
@@ -37,6 +45,7 @@ export class RateLimiter {
   public async addReq(ip: string) {
     await this.init();
     const res = await this.check(ip);
+
     if (res) {
       await this.addEntry(ip);
       return 1;
