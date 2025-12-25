@@ -20,19 +20,13 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href="#"
-                className="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 transition"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
+                href="https://www.linkedin.com/company/apnisec/"
                 className="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 transition"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://x.com/apnisec/"
                 className="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 transition"
               >
                 <Twitter className="w-5 h-5" />
@@ -114,23 +108,6 @@ export default function Footer() {
                 </span>
               </li>
             </ul>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-green-500/20">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© {currentYear} ApniSec. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-green-500 transition">
-                Terms of Service
-              </a>
-              <a href="#" className="hover:text-green-500 transition">
-                Privacy Policy
-              </a>
-              <a href="#" className="hover:text-green-500 transition">
-                Cookie Policy
-              </a>
-            </div>
           </div>
         </div>
       </div>

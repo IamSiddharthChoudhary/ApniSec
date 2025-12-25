@@ -19,6 +19,9 @@ export default function LiveIssues() {
     open: 0,
     resolved: 0,
   });
+  const [pg, setPg] = useState(1);
+  const [allData, setAllData] = useState<Issue[]>([]);
+  const perPg = 9;
 
   useEffect(() => {
     fetchIssues();
@@ -30,7 +33,11 @@ export default function LiveIssues() {
       if (res.ok) {
         const data = await res.json();
         const issueData = data.posts || [];
-        setIssues(issueData.slice(0, 6)); // Show only 6 recent issues
+        setAllData(issueData);
+
+        const start = (pg - 1) * perPg;
+        const end = start + perPg;
+        setIssues(issueData.slice(start, end));
 
         setStats({
           total: issueData.length,
@@ -45,6 +52,14 @@ export default function LiveIssues() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (allData.length > 0) {
+      const start = (pg - 1) * perPg;
+      const end = start + perPg;
+      setIssues(allData.slice(start, end));
+    }
+  }, [pg]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -68,6 +83,16 @@ export default function LiveIssues() {
     }
   };
 
+  const totalPgs = Math.ceil(allData.length / perPg);
+
+  const goNext = () => {
+    if (pg < totalPgs) setPg(pg + 1);
+  };
+
+  const goPrev = () => {
+    if (pg > 1) setPg(pg - 1);
+  };
+
   return (
     <section id="issues" className="py-20 px-4 gradient-bg">
       <div className="max-w-7xl mx-auto">
@@ -80,7 +105,6 @@ export default function LiveIssues() {
           </p>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
             <div className="flex items-center justify-between">
@@ -115,7 +139,6 @@ export default function LiveIssues() {
           </div>
         </div>
 
-        {/* Issues Grid */}
         {loading ? (
           <div className="text-center py-12">
             <Clock className="w-12 h-12 animate-spin mx-auto text-green-500" />
@@ -172,14 +195,25 @@ export default function LiveIssues() {
           </div>
         )}
 
-        {issues.length > 0 && (
-          <div className="text-center mt-12">
-            <a
-              href="/auth/login"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition"
+        {!loading && allData.length > perPg && (
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button
+              onClick={goPrev}
+              disabled={pg === 1}
+              className="px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              View All Issues
-            </a>
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Page {pg} of {totalPgs}
+            </span>
+            <button
+              onClick={goNext}
+              disabled={pg === totalPgs}
+              className="px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
