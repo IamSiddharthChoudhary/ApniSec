@@ -104,6 +104,16 @@ The backend follows object-oriented principles with these main classes:
 - **SbDataClient** - Manages issue/post database operations
 - **RateLimiter** - In-memory rate limiting implementation
 
+### Implementation Highlights
+
+**Custom JWT Authentication**: Implemented from scratch rather than using Supabase's built-in auth, providing full control over token lifecycle and security.
+
+**In-Memory Rate Limiter**: Built a custom rate limiter using JavaScript Maps with automatic cleanup of expired entries. Limits requests to 100 per 15-minute window per IP address. Chose this approach over Redis due to Vercel's serverless constraints.
+
+**RESTful API Design**: All endpoints follow REST principles with proper HTTP methods and status codes. Public read access for issues, authenticated write operations.
+
+**Security**: Passwords hashed with bcrypt (10 salt rounds), JWT tokens with expiration, protected routes with middleware-style auth checks.
+
 ## Setup Instructions
 
 1. Clone the repository
