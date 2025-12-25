@@ -15,59 +15,139 @@ export class ResendEmail {
   }
 
   async sendWelcome(to: string, name: string) {
-    await this.r.emails.send({
-      from: "ApniSec <onboarding@resend.dev>",
-      to,
-      subject: "Welcome to ApniSec",
-      html: `
-        <h2>Welcome ${name} </h2>
-        <p>Your account has been created successfully.</p>
-        <p>Start reporting and tracking security issues securely.</p>
-      `,
-    });
+    try {
+      const { data, error } = await this.r.emails.send({
+        from: "ApniSec <onboarding@resend.dev>",
+        to,
+        subject: "Welcome to ApniSec",
+        html: `
+          <h2>Welcome ${name}!</h2>
+          <p>Your account has been created successfully.</p>
+          <p>Start reporting and tracking security issues securely.</p>
+        `,
+      });
+
+      if (error) {
+        console.error("Welcome email error:", error);
+        return false;
+      }
+
+      console.log("Welcome email sent:", data);
+      return true;
+    } catch (e) {
+      console.error("Welcome email failed:", e);
+      return false;
+    }
+  }
+
+  async sendLoginNotification(to: string, name: string) {
+    try {
+      const { data, error } = await this.r.emails.send({
+        from: "ApniSec <security@resend.dev>",
+        to,
+        subject: "New Login Detected",
+        html: `
+          <h3>Login Activity</h3>
+          <p>Hi ${name},</p>
+          <p>A new login was detected on your ApniSec account.</p>
+          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+          <p>If this wasn't you, please reset your password immediately.</p>
+        `,
+      });
+
+      if (error) {
+        console.error("Login notification error:", error);
+        return false;
+      }
+
+      console.log("Login notification sent:", data);
+      return true;
+    } catch (e) {
+      console.error("Login notification failed:", e);
+      return false;
+    }
   }
 
   async sendIssueCreated(to: string, issue: IssuePayload) {
-    await this.r.emails.send({
-      from: "ApniSec <alerts@resend.dev>",
-      to,
-      subject: `New Security Issue #${issue.id}`,
-      html: `
-        <h3>New Issue Reported</h3>
-        <p><strong>Issue ID:</strong> #${issue.id}</p>
-        <p><strong>Type:</strong> ${issue.type}</p>
-        <p><strong>Created by:</strong> ${issue.createdBy}</p>
-        <p><strong>Description:</strong></p>
-        <p>${issue.description}</p>
-      `,
-    });
+    try {
+      const { data, error } = await this.r.emails.send({
+        from: "ApniSec <alerts@resend.dev>",
+        to,
+        subject: `New Security Issue #${issue.id}`,
+        html: `
+          <h3>New Issue Reported</h3>
+          <p><strong>Issue ID:</strong> #${issue.id}</p>
+          <p><strong>Type:</strong> ${issue.type}</p>
+          <p><strong>Created by:</strong> ${issue.createdBy}</p>
+          <p><strong>Description:</strong></p>
+          <p>${issue.description}</p>
+        `,
+      });
+
+      if (error) {
+        console.error("Issue created email error:", error);
+        return false;
+      }
+
+      console.log("Issue created email sent:", data);
+      return true;
+    } catch (e) {
+      console.error("Issue created email failed:", e);
+      return false;
+    }
   }
 
   async sendPasswordReset(to: string, name: string, link: string) {
-    await this.r.emails.send({
-      from: "ApniSec <security@resend.dev>",
-      to,
-      subject: "Reset Your Password",
-      html: `
-        <h3>Password Reset</h3>
-        <p>Hi ${name}, we received a request to reset your password.</p>
-        <p>Click the link below to reset your password. This link expires in 1 hour:</p>
-        <a href="${link}">${link}</a>
-        <p>If you didn't request this, ignore this email.</p>
-      `,
-    });
+    try {
+      const { data, error } = await this.r.emails.send({
+        from: "ApniSec <security@resend.dev>",
+        to,
+        subject: "Reset Your Password",
+        html: `
+          <h3>Password Reset</h3>
+          <p>Hi ${name}, we received a request to reset your password.</p>
+          <p>Click the link below to reset your password. This link expires in 1 hour:</p>
+          <a href="${link}">${link}</a>
+          <p>If you didn't request this, ignore this email.</p>
+        `,
+      });
+
+      if (error) {
+        console.error("Password reset email error:", error);
+        return false;
+      }
+
+      console.log("Password reset email sent:", data);
+      return true;
+    } catch (e) {
+      console.error("Password reset email failed:", e);
+      return false;
+    }
   }
 
   async sendProfileUpdated(to: string, name: string, fields: string[]) {
-    await this.r.emails.send({
-      from: "ApniSec <no-reply@resend.dev>",
-      to,
-      subject: "Profile Updated",
-      html: `
-        <p>Hi ${name}, your profile details were updated successfully.</p>
-        <p><strong>Updated fields:</strong> ${fields.join(", ")}</p>
-        <p>If this wasn't you, please contact support immediately.</p>
-      `,
-    });
+    try {
+      const { data, error } = await this.r.emails.send({
+        from: "ApniSec <no-reply@resend.dev>",
+        to,
+        subject: "Profile Updated",
+        html: `
+          <p>Hi ${name}, your profile details were updated successfully.</p>
+          <p><strong>Updated fields:</strong> ${fields.join(", ")}</p>
+          <p>If this wasn't you, please contact support immediately.</p>
+        `,
+      });
+
+      if (error) {
+        console.error("Profile updated email error:", error);
+        return false;
+      }
+
+      console.log("Profile updated email sent:", data);
+      return true;
+    } catch (e) {
+      console.error("Profile updated email failed:", e);
+      return false;
+    }
   }
 }

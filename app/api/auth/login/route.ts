@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Auth } from "../../utils/authClass";
+import { ResendEmail } from "../../utils/email";
 
 const auth = new Auth();
+const resend = new ResendEmail();
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +18,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { user, tk } = await auth.login(email, password);
+
+    resend
+      .sendLoginNotification(email, user.name)
+      .catch((e) => console.error("Login email failed:", e));
 
     return NextResponse.json(
       { token: tk, user: user, message: "Successful" },
