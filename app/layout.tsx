@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Apni Sec",
+  title: "Apni Sec - Siddharth",
   description: "",
 };
 
