@@ -16,10 +16,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = [
-    { label: "Features", path: "#features" },
-    { label: "Services", path: "#services" },
-    { label: "About", path: "#about" },
+  const navItems: any[] = [
+    // { label: "Features", path: "#features" },
+    // { label: "Services", path: "#services" },
+    // { label: "About", path: "#about" },
   ];
 
   const handleNavigation = (path: string) => {
