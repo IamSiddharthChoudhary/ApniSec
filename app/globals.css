@@ -5,6 +5,24 @@
   --foreground: #171717;
 }
 
+@font-face {
+  font-family: "Pacifico-Regular";
+  src: url("/fonts/Pacifico-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SpaceGrotesk-VariableFont_wght";
+  src: url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+.fancy {
+  font-family: "Pacifico-Regular", sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -22,5 +40,43 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "SpaceGrotesk-VariableFont_wght", Helvetica, sans-serif;
+}
+
+.gradient-bg {
+  background: radial-gradient(
+      circle at 20% 50%,
+      rgba(16, 185, 129, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(6, 182, 212, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 20%,
+      rgba(14, 165, 233, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 60% 90%,
+      rgba(34, 197, 94, 0.12) 0%,
+      transparent 50%
+    ),
+    linear-gradient(135deg, #0a0a0a 0%, #0f172a 100%);
+
+  min-height: 100vh;
+
+  background-size: 200% 200%, 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+
+  background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 0% 0%;
+
+  animation: move 3s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+@keyframes move {
+  to {
+    background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%, 0% 0%;
+  }
 }
