@@ -168,4 +168,4 @@ The application achieves excellent Lighthouse scores across global regions:
 | `NEXT_PUBLIC_SB_KEY`     | Supabase anonymous key           |
 | `NEXT_PUBLIC_JWT_SECRET` | Secret for JWT token signing     |
 | `NEXT_PUBLIC_SALT`       | Bcrypt salt rounds (default: 10) |
-| `NEXt_PUBLIC_RESEND`     | Resend API key for emails        |
+| `NEXT_PUBLIC_RESEND`     | Resend API key for emails        |
